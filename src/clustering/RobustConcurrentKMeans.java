@@ -15,7 +15,7 @@
  *
  */
 
-package robust.concurrent.kmeans;
+package clustering;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,6 +33,7 @@ public class RobustConcurrentKMeans implements KMeans {
 
     // 2D array holding the coordinates to be clustered.
     public static float[][] mCoordinates;
+    protected boolean useKMedians = false;
     // Temporary clusters used during the clustering process.  Converted to
     // an array of the simpler class Cluster at the conclusion.
     public static ProtoCluster[] mProtoClusters;
@@ -82,7 +83,7 @@ public class RobustConcurrentKMeans implements KMeans {
 
     /**
      * Constructor that uses the return from
-     * <tt>Runtime.getRuntime().availableProcessors()</tt> as the number
+     * Runtime.getRuntime().availableProcessors() as the number
      * of threads for time-consuming steps.
      *
      * @param coordinates   two-dimensional array containing the coordinates to be clustered.
@@ -178,10 +179,6 @@ public class RobustConcurrentKMeans implements KMeans {
     public void run() {
 
         try {
-
-            // Note the start time.
-            long startTime = System.currentTimeMillis();
-
             postKMeansMessage("K-Means clustering started");
 
             // Randomly initialize the cluster centers creating the
@@ -190,7 +187,7 @@ public class RobustConcurrentKMeans implements KMeans {
             postKMeansMessage("... centers initialized");
 
             // Instantiate the subtask manager.
-            mSubtaskManager = new SubtaskManager(mThreadCount);
+            mSubtaskManager = new SubtaskManager(mThreadCount, useKMedians);
 
             // Post a message about the state of concurrent subprocessing.
             if (mThreadCount > 1) {
@@ -240,8 +237,6 @@ public class RobustConcurrentKMeans implements KMeans {
             // of the simpler class Cluster.
             mClusters = generateFinalClusters();
 
-            long executionTime = System.currentTimeMillis() - startTime;
-
             postKMeansComplete(mClusters);
 
         } catch (Throwable t) {
@@ -276,7 +271,7 @@ public class RobustConcurrentKMeans implements KMeans {
 
 
         int[] indices = new SmartInitialization(mCoordinates, mK,
-                random.nextInt(coordCount)).getSmartClusterInitialization();
+                random.nextInt(coordCount), useKMedians).getSmartClusterInitialization();
         mProtoClusters = new ProtoCluster[mK];
         for (int i = 0; i < mK; i++) {
             int coordIndex = indices[i];
@@ -304,7 +299,7 @@ public class RobustConcurrentKMeans implements KMeans {
                     cluster.setUpdateFlag();
                     // If the update flag was set, update the center.
                     if (cluster.needsUpdate()) {
-                        cluster.updateCenter(mCoordinates);
+                        cluster.updateCenter(mCoordinates, useKMedians);
                     }
                 } else {
                     // When a cluster loses all of its members, it

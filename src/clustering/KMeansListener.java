@@ -15,25 +15,30 @@
  *
  */
 
-package robust.concurrent.kmeans;
+package clustering;
 
 /**
- * Exception thrown when insufficient memory is available to
- * perform an operation.  Designed to be throw before doing
- * something that would cause a <code>java.lang.OutOfMemoryError</code>.
+ * Defines object which register with implementation of <code>KMeans</code>
+ * to be notified of significant events during clustering.
  */
-class InsufficientMemoryException extends Exception {
-
-    private static final long serialVersionUID = 72138634L;
+public interface KMeansListener {
 
     /**
-     * Constructor.
-     *
-     * @param message an explanatory message.
+     * A message has been received.
      */
-    public InsufficientMemoryException(String message) {
-        super(message);
-    }
+    void kmeansMessage(String message);
+
+    /**
+     * KMeans is complete.
+     *
+     * @param clusters the output of clustering.
+     */
+    void kmeansComplete(Cluster[] clusters);
+
+    /**
+     * An error occurred during KMeans clustering.
+     */
+    void kmeansError(Throwable t);
 
 }
 

@@ -15,7 +15,9 @@
  *
  */
 
-package robust.concurrent.kmeans;
+package clustering;
+
+import java.util.Arrays;
 
 /**
  * Class to represent a cluster of coordinates.
@@ -56,5 +58,13 @@ public class Cluster {
         return center;
     }
 
+    public Cluster getClone() {
+        if (memberIndexes != null && center != null) {
+            int[] membersCopy = Arrays.copyOf(memberIndexes, memberIndexes.length);
+            float[] centerCopy = Arrays.copyOf(center, center.length);
+            return new Cluster(membersCopy, centerCopy);
+        }
+        return null;
+    }
 }
 

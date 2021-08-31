@@ -22,27 +22,8 @@
  *  THE SOFTWARE.
  */
 
-package robust.concurrent.kmeans;
+package metric;
 
-public class RobustEuclideanDistance {
-    public static float distance(final float[] x, final float[] y) {
-        return (float) Math.sqrt(getNonNanMeanSquaredError(x, y));
-    }
-
-    public static double getNonNanMeanSquaredError(float[] x, float[] y) {
-        double sumOfSquares = 0;
-        int numVals = 0;
-        for (int i = 0; i < x.length; i++) {
-            final float v = x[i] - y[i];
-            if (!Float.isNaN(v)) {
-                sumOfSquares += (v * v);
-                numVals++;
-            }
-        }
-        if (numVals < 1) {
-            //System.err.println("Vector too sparse");
-            return Float.MAX_VALUE;
-        }
-        return x.length * sumOfSquares / numVals;
-    }
+public abstract class DistanceMetric {
+    abstract public float distance(final float[] x, final float[] y);
 }

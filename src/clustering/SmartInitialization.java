@@ -22,7 +22,11 @@
  *  THE SOFTWARE.
  */
 
-package robust.concurrent.kmeans;
+package clustering;
+
+import metric.DistanceMetric;
+import metric.RobustEuclideanDistance;
+import metric.RobustManhattanDistance;
 
 import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
@@ -35,14 +39,20 @@ public class SmartInitialization {
     private final int numClusters;
     private final int[] bestIndices;
     private final float[] distFromClosestPoint;
+    private final DistanceMetric metric;
 
-    public SmartInitialization(float[][] data, int numClusters, int initialID) {
+    public SmartInitialization(float[][] data, int numClusters, int initialID, boolean useKMedians) {
         this.data = data;
         this.numClusters = numClusters;
         bestIndices = new int[numClusters];
         bestIndices[0] = initialID;
         distFromClosestPoint = new float[data.length];
         Arrays.fill(distFromClosestPoint, Float.MAX_VALUE);
+        if (useKMedians) {
+            metric = RobustManhattanDistance.SINGLETON;
+        } else {
+            metric = RobustEuclideanDistance.SINGLETON;
+        }
     }
 
     public int[] getSmartClusterInitialization() {
@@ -66,7 +76,7 @@ public class SmartInitialization {
                 while (k < data.length) {
                     float newDist = 0;
                     if (k != index) {
-                        newDist = RobustEuclideanDistance.distance(data[k], data[index]);
+                        newDist = metric.distance(data[k], data[index]);
                     }
                     distFromClosestPoint[k] = Math.min(distFromClosestPoint[k], newDist);
                     k = currRowIndex.getAndIncrement();

@@ -15,10 +15,13 @@
  *
  */
 
-package robust.concurrent.kmeans;
+package clustering;
 
+import metric.QuickMedian;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Cluster class used temporarily during clustering.  Upon completion,
@@ -184,7 +187,15 @@ public class ProtoCluster {
      *
      * @param coordinates the array of coordinates.
      */
-    void updateCenter(float[][] coordinates) {
+    void updateCenter(float[][] coordinates, boolean useKMedians) {
+        if (useKMedians) {
+            updateCenterKMedians(coordinates);
+        } else {
+            updateCenterKMeans(coordinates);
+        }
+    }
+
+    private void updateCenterKMeans(float[][] coordinates) {
         Arrays.fill(mCenter, 0f);
         if (mCurrentSize > 0) {
             int[] mCurrentSizeForIndex = new int[mCenter.length];
@@ -199,6 +210,22 @@ public class ProtoCluster {
             }
             for (int i = 0; i < mCenter.length; i++) {
                 mCenter[i] /= Math.max(mCurrentSizeForIndex[i], 1);
+            }
+        }
+    }
+
+    private void updateCenterKMedians(float[][] coordinates) {
+        Arrays.fill(mCenter, 0f);
+        if (mCurrentSize > 0) {
+            for (int j = 0; j < mCenter.length; j++) {
+                List<Float> entries = new ArrayList<>();
+                for (int i = 0; i < mCurrentSize; i++) {
+                    float[] coord = coordinates[mCurrentMembership[i]];
+                    if (!Float.isNaN(coord[j])) {
+                        entries.add(coord[j]);
+                    }
+                }
+                mCenter[j] = QuickMedian.fastMedian(entries);
             }
         }
     }

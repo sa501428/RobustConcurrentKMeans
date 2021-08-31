@@ -15,7 +15,11 @@
  *
  */
 
-package robust.concurrent.kmeans;
+package clustering;
+
+import metric.DistanceMetric;
+import metric.RobustEuclideanDistance;
+import metric.RobustManhattanDistance;
 
 import java.util.concurrent.BrokenBarrierException;
 
@@ -37,6 +41,9 @@ public class Worker implements Runnable {
     // to workerMakeAssignments().  The SubtaskManager totals up
     // this value from all the workers in numberOfMoves().
     private int mMoves;
+    private final DistanceMetric euclidean = RobustEuclideanDistance.SINGLETON;
+    private final DistanceMetric manhattan = RobustManhattanDistance.SINGLETON;
+    private final boolean useKMedians;
 
     /**
      * Constructor
@@ -45,9 +52,10 @@ public class Worker implements Runnable {
      *                   this Worker.
      * @param numCoords  the number of coordinates covered.
      */
-    Worker(int startCoord, int numCoords) {
+    Worker(int startCoord, int numCoords, boolean useKMedians) {
         mStartCoord = startCoord;
         mNumCoords = numCoords;
+        this.useKMedians = useKMedians;
     }
 
     /**
@@ -99,7 +107,8 @@ public class Worker implements Runnable {
             for (int c = 0; c < numClusters; c++) {
                 ProtoCluster cluster = mProtoClusters[c];
                 if (cluster.getConsiderForAssignment() && cluster.needsUpdate()) {
-                    RobustConcurrentKMeans.mDistanceCache[i][c] = distanceL2Norm(RobustConcurrentKMeans.mCoordinates[i], cluster.getCenter());
+                    RobustConcurrentKMeans.mDistanceCache[i][c] = distanceL2Norm(RobustConcurrentKMeans.mCoordinates[i],
+                            cluster.getCenter());
                 }
             }
         }
@@ -125,7 +134,11 @@ public class Worker implements Runnable {
      * Compute the euclidean distance between the two arguments.
      */
     private float distanceL2Norm(float[] coord, float[] center) {
-        return RobustEuclideanDistance.distance(coord, center);
+        if (useKMedians) {
+            return manhattan.distance(coord, center);
+        } else {
+            return euclidean.distance(coord, center);
+        }
     }
 
     /**

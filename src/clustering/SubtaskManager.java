@@ -15,7 +15,7 @@
  *
  */
 
-package robust.concurrent.kmeans;
+package clustering;
 
 import java.util.Arrays;
 import java.util.concurrent.*;
@@ -47,7 +47,7 @@ public class SubtaskManager {
      * @param numThreads the number of worker threads to be used for
      *                   the subtasks.
      */
-    SubtaskManager(int numThreads) {
+    SubtaskManager(int numThreads, boolean useKMedians) {
 
         if (numThreads <= 0) {
             throw new IllegalArgumentException("number of threads <= 0: "
@@ -85,7 +85,7 @@ public class SubtaskManager {
         for (int i = 0; i < numThreads; i++) {
             // Each worker needs to know its starting coordinate and the number of
             // coordinates it handles.
-            mWorkers[i] = new Worker(startCoord, coordsPerWorker[i]);
+            mWorkers[i] = new Worker(startCoord, coordsPerWorker[i], useKMedians);
             startCoord += coordsPerWorker[i];
         }
 
