@@ -22,32 +22,30 @@
  *  THE SOFTWARE.
  */
 
-package metric;
+package robust.concurrent.kmeans.metric;
 
-public class RobustManhattanDistance extends DistanceMetric {
-    public static final RobustManhattanDistance SINGLETON = new RobustManhattanDistance();
+public class RobustEuclideanDistance extends DistanceMetric {
+    public static final RobustEuclideanDistance SINGLETON = new RobustEuclideanDistance();
 
     @Override
     public float distance(final float[] x, final float[] y) {
-        //  D(x, y) = \sqrt{\sum_i (x_i - y_i)^2}
-        double result = getNonNanMeanAbsoluteError(x, y);
-        return (float) (result * x.length);
+        return (float) Math.sqrt(getNonNanMeanSquaredError(x, y));
     }
 
-    private double getNonNanMeanAbsoluteError(float[] x, float[] y) {
-        double sumOfError = 0;
-        int numDiffs = 0;
+    public double getNonNanMeanSquaredError(float[] x, float[] y) {
+        double sumOfSquares = 0;
+        int numVals = 0;
         for (int i = 0; i < x.length; i++) {
-            float diff = x[i] - y[i];
-            if (!Float.isNaN(diff)) {
-                sumOfError += Math.abs(diff);
-                numDiffs++;
+            final float v = x[i] - y[i];
+            if (!Float.isNaN(v)) {
+                sumOfSquares += (v * v);
+                numVals++;
             }
         }
-        if (numDiffs < 1) {
+        if (numVals < 1) {
             //System.err.println("Vector too sparse");
             return Float.MAX_VALUE;
         }
-        return sumOfError / numDiffs;
+        return x.length * sumOfSquares / numVals;
     }
 }

@@ -15,9 +15,9 @@
  *
  */
 
-package clustering;
+package robust.concurrent.kmeans.clustering;
 
-import metric.QuickMedian;
+import robust.concurrent.kmeans.metric.QuickMedian;
 
 import java.util.ArrayList;
 import java.util.Arrays;

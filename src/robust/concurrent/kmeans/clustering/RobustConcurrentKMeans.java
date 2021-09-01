@@ -15,7 +15,7 @@
  *
  */
 
-package clustering;
+package robust.concurrent.kmeans.clustering;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -1,4 +1,4 @@
-package clustering;
+package robust.concurrent.kmeans.clustering;
 
 public class RobustConcurrentKMedians extends RobustConcurrentKMeans {
     /**

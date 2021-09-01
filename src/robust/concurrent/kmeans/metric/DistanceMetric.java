@@ -22,7 +22,7 @@
  *  THE SOFTWARE.
  */
 
-package metric;
+package robust.concurrent.kmeans.metric;
 
 public abstract class DistanceMetric {
     abstract public float distance(final float[] x, final float[] y);

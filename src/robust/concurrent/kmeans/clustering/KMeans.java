@@ -15,7 +15,7 @@
  *
  */
 
-package clustering;
+package robust.concurrent.kmeans.clustering;
 
 /**
  * Simple K-Means clustering interface.

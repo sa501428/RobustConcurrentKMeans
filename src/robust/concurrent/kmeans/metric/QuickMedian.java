@@ -23,7 +23,7 @@
  *  THE SOFTWARE.
  */
 
-package metric;
+package robust.concurrent.kmeans.metric;
 
 import java.util.List;
 

@@ -15,11 +15,11 @@
  *
  */
 
-package clustering;
+package robust.concurrent.kmeans.clustering;
 
-import metric.DistanceMetric;
-import metric.RobustEuclideanDistance;
-import metric.RobustManhattanDistance;
+import robust.concurrent.kmeans.metric.DistanceMetric;
+import robust.concurrent.kmeans.metric.RobustEuclideanDistance;
+import robust.concurrent.kmeans.metric.RobustManhattanDistance;
 
 import java.util.concurrent.BrokenBarrierException;
 
