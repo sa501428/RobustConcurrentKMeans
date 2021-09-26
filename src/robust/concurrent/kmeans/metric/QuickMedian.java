@@ -42,7 +42,6 @@ public class QuickMedian {
         float temp = arr[z + 1];
         arr[z + 1] = arr[high];
         arr[high] = temp;
-
         return z + 1;
     }
 
@@ -60,15 +59,47 @@ public class QuickMedian {
     public static float fastMedian(float[] arr) {
         int len = arr.length;
         if (len % 2 == 1) {
-            return kSelection(arr, 0, len - 1, len / 2);  //median is at n/2 position if length is odd
+            return kSelection(arr, 0, len - 1, len / 2);
         } else {
             float a = kSelection(arr, 0, len - 1, len / 2);
             float b = kSelection(arr, 0, len - 1, len / 2 - 1);
-            return (a + b) / 2;       //median by performing average between n/2 and n/2-1
+            return (a + b) / 2;
         }
     }
 
-    public static float fastMedian(List<Float> list) {
+    public static float fastMedianType4(float[] arr) {
+        int len = arr.length;
+        if (len % 2 == 1) {
+            return kSelection4(arr, 0, len - 1, len / 2);
+        } else {
+            float a = kSelection4(arr, 0, len - 1, len / 2);
+            float b = kSelection4(arr, 0, len - 1, len / 2 - 1);
+            return (a + b) / 2;
+        }
+    }
+
+    public static float kSelection4(float[] arr, int low, int high, int k) {
+        int localLow = low;
+        int localHigh = high;
+
+        int partitionSortingValue = partition(arr, localLow, localHigh);
+        while (partitionSortingValue != k) {
+            if (partitionSortingValue < k) {
+                localLow = partitionSortingValue + 1;
+            } else {
+                localHigh = partitionSortingValue - 1;
+            }
+            partitionSortingValue = partition(arr, localLow, localHigh);
+        }
+        return arr[partitionSortingValue];
+    }
+
+    public static float fastMedian(List<Float> list, int type) {
+
+        //if(type == 2){
+        //    return fastMedianType2(list);
+        //}
+
         int size = list.size();
         if (size < 1) {
             return 0f;
@@ -80,6 +111,15 @@ public class QuickMedian {
         for (int k = 0; k < arr.length; k++) {
             arr[k] = list.get(k);
         }
+
+        //if(type == 3){
+        //    return fastMedianType3(arr);
+        //}
+
+        if (type == 4) {
+            return fastMedianType4(arr);
+        }
+
         return fastMedian(arr);
     }
 }

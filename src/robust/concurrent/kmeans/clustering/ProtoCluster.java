@@ -230,7 +230,7 @@ public class ProtoCluster {
                     }
                 }
                 if (entries.size() > 0) {
-                    mCenter[j] = QuickMedian.fastMedian(entries);
+                    mCenter[j] = QuickMedian.fastMedian(entries, 2);
                 } else {
                     mCenter[j] = Float.NaN;
                 }
