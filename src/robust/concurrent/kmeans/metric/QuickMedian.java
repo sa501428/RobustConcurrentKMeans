@@ -28,32 +28,21 @@ package robust.concurrent.kmeans.metric;
 import java.util.List;
 
 public class QuickMedian {
-    static int partition(float[] arr, int low, int high) {
-        float pivot = arr[high];
-        int z = (low - 1);
-        for (int j = low; j < high; j++) {
-            if (arr[j] < pivot) {
-                z++;
-                float temp = arr[z];
-                arr[z] = arr[j];
-                arr[j] = temp;
-            }
-        }
-        float temp = arr[z + 1];
-        arr[z + 1] = arr[high];
-        arr[high] = temp;
-        return z + 1;
-    }
 
-    public static float kSelection(float[] arr, int low, int high, int k) {
-        int partitionSortingValue = partition(arr, low, high);
-        if (partitionSortingValue == k) {
-            return arr[partitionSortingValue];
-        } else if (partitionSortingValue < k) {
-            return kSelection(arr, partitionSortingValue + 1, high, k);
-        } else {
-            return kSelection(arr, low, partitionSortingValue - 1, k);
+    public static float fastMedian(List<Float> list) {
+        int size = list.size();
+        if (size < 1) {
+            return Float.NaN;
+        } else if (size == 1) {
+            return list.get(0);
         }
+
+        float[] arr = new float[size];
+        for (int k = 0; k < arr.length; k++) {
+            arr[k] = list.get(k);
+        }
+
+        return fastMedian(arr);
     }
 
     public static float fastMedian(float[] arr) {
@@ -67,18 +56,7 @@ public class QuickMedian {
         }
     }
 
-    public static float fastMedianType4(float[] arr) {
-        int len = arr.length;
-        if (len % 2 == 1) {
-            return kSelection4(arr, 0, len - 1, len / 2);
-        } else {
-            float a = kSelection4(arr, 0, len - 1, len / 2);
-            float b = kSelection4(arr, 0, len - 1, len / 2 - 1);
-            return (a + b) / 2;
-        }
-    }
-
-    public static float kSelection4(float[] arr, int low, int high, int k) {
+    public static float kSelection(float[] arr, int low, int high, int k) {
         int localLow = low;
         int localHigh = high;
 
@@ -94,76 +72,20 @@ public class QuickMedian {
         return arr[partitionSortingValue];
     }
 
-    public static float fastMedian(List<Float> list, int type) {
-
-        if (type == 5) {
-            return fastMedianType5(list);
-        }
-
-        int size = list.size();
-        if (size < 1) {
-            return 0f;
-        } else if (size == 1) {
-            return list.get(0);
-        }
-
-        float[] arr = new float[size];
-        for (int k = 0; k < arr.length; k++) {
-            arr[k] = list.get(k);
-        }
-
-        //if(type == 3){
-        //    return fastMedianType3(arr);
-        //}
-
-        if (type == 4) {
-            return fastMedianType4(arr);
-        }
-
-        return fastMedian(arr);
-    }
-
-    private static float fastMedianType5(List<Float> list) {
-        int len = list.size();
-        if (len % 2 == 1) {
-            return kSelection5(list, 0, len - 1, len / 2);
-        } else {
-            float a = kSelection5(list, 0, len - 1, len / 2);
-            float b = kSelection5(list, 0, len - 1, len / 2 - 1);
-            return (a + b) / 2;
-        }
-    }
-
-    private static float kSelection5(List<Float> arr, int low, int high, int k) {
-        int localLow = low;
-        int localHigh = high;
-
-        int partitionSortingValue = partition5(arr, localLow, localHigh);
-        while (partitionSortingValue != k) {
-            if (partitionSortingValue < k) {
-                localLow = partitionSortingValue + 1;
-            } else {
-                localHigh = partitionSortingValue - 1;
-            }
-            partitionSortingValue = partition5(arr, localLow, localHigh);
-        }
-        return arr.get(partitionSortingValue);
-    }
-
-    static int partition5(List<Float> arr, int low, int high) {
-        float pivot = arr.get(high);
+    static int partition(float[] arr, int low, int high) {
+        float pivot = arr[high];
         int z = (low - 1);
         for (int j = low; j < high; j++) {
-            if (arr.get(j) < pivot) {
+            if (arr[j] < pivot) {
                 z++;
-                float temp = arr.get(z);
-                arr.set(z, arr.get(j));
-                arr.set(j, temp);
+                float temp = arr[z];
+                arr[z] = arr[j];
+                arr[j] = temp;
             }
         }
-        float temp = arr.get(z + 1);
-        arr.set(z + 1, arr.get(high));
-        arr.set(high, temp);
+        float temp = arr[z + 1];
+        arr[z + 1] = arr[high];
+        arr[high] = temp;
         return z + 1;
     }
 }
