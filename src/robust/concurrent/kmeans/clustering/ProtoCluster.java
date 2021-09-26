@@ -209,7 +209,11 @@ public class ProtoCluster {
                 }
             }
             for (int i = 0; i < mCenter.length; i++) {
-                mCenter[i] /= Math.max(mCurrentSizeForIndex[i], 1);
+                if (mCurrentSizeForIndex[i] < 1) {
+                    mCenter[i] = Float.NaN;
+                } else {
+                    mCenter[i] /= mCurrentSizeForIndex[i];
+                }
             }
         }
     }
@@ -225,7 +229,11 @@ public class ProtoCluster {
                         entries.add(coord[j]);
                     }
                 }
-                mCenter[j] = QuickMedian.fastMedian(entries);
+                if (entries.size() > 0) {
+                    mCenter[j] = QuickMedian.fastMedian(entries);
+                } else {
+                    mCenter[j] = Float.NaN;
+                }
             }
         }
     }
