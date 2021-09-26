@@ -96,9 +96,9 @@ public class QuickMedian {
 
     public static float fastMedian(List<Float> list, int type) {
 
-        //if(type == 2){
-        //    return fastMedianType2(list);
-        //}
+        if (type == 5) {
+            return fastMedianType5(list);
+        }
 
         int size = list.size();
         if (size < 1) {
@@ -121,5 +121,49 @@ public class QuickMedian {
         }
 
         return fastMedian(arr);
+    }
+
+    private static float fastMedianType5(List<Float> list) {
+        int len = list.size();
+        if (len % 2 == 1) {
+            return kSelection5(list, 0, len - 1, len / 2);
+        } else {
+            float a = kSelection5(list, 0, len - 1, len / 2);
+            float b = kSelection5(list, 0, len - 1, len / 2 - 1);
+            return (a + b) / 2;
+        }
+    }
+
+    private static float kSelection5(List<Float> arr, int low, int high, int k) {
+        int localLow = low;
+        int localHigh = high;
+
+        int partitionSortingValue = partition5(arr, localLow, localHigh);
+        while (partitionSortingValue != k) {
+            if (partitionSortingValue < k) {
+                localLow = partitionSortingValue + 1;
+            } else {
+                localHigh = partitionSortingValue - 1;
+            }
+            partitionSortingValue = partition5(arr, localLow, localHigh);
+        }
+        return arr.get(partitionSortingValue);
+    }
+
+    static int partition5(List<Float> arr, int low, int high) {
+        float pivot = arr.get(high);
+        int z = (low - 1);
+        for (int j = low; j < high; j++) {
+            if (arr.get(j) < pivot) {
+                z++;
+                float temp = arr.get(z);
+                arr.set(z, arr.get(j));
+                arr.set(j, temp);
+            }
+        }
+        float temp = arr.get(z + 1);
+        arr.set(z + 1, arr.get(high));
+        arr.set(high, temp);
+        return z + 1;
     }
 }

@@ -8,12 +8,12 @@ public class TestMedians {
 
     public static void main(String[] args) {
 
-        int[] numValues = new int[]{30000000};
+        int[] numValues = new int[]{9000000, 30000000};
 
 
         for (int n : numValues) {
             List<Float> randomNumbers = generateRandomNumbers(n);
-            for (int z : new int[]{1, 4}) {
+            for (int z : new int[]{1, 4, 5}) {
                 long time0 = System.nanoTime();
                 float result = QuickMedian.fastMedian(randomNumbers, z);
                 long time1 = System.nanoTime();
