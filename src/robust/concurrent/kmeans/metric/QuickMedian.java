@@ -28,6 +28,50 @@ package robust.concurrent.kmeans.metric;
 import java.util.List;
 
 public class QuickMedian {
+
+    public static float fastMedian(List<Float> list) {
+        int size = list.size();
+        if (size < 1) {
+            return Float.NaN;
+        } else if (size == 1) {
+            return list.get(0);
+        }
+
+        float[] arr = new float[size];
+        for (int k = 0; k < arr.length; k++) {
+            arr[k] = list.get(k);
+        }
+
+        return fastMedian(arr);
+    }
+
+    public static float fastMedian(float[] arr) {
+        int len = arr.length;
+        if (len % 2 == 1) {
+            return kSelection(arr, 0, len - 1, len / 2);
+        } else {
+            float a = kSelection(arr, 0, len - 1, len / 2);
+            float b = kSelection(arr, 0, len - 1, len / 2 - 1);
+            return (a + b) / 2;
+        }
+    }
+
+    public static float kSelection(float[] arr, int low, int high, int k) {
+        int localLow = low;
+        int localHigh = high;
+
+        int partitionSortingValue = partition(arr, localLow, localHigh);
+        while (partitionSortingValue != k) {
+            if (partitionSortingValue < k) {
+                localLow = partitionSortingValue + 1;
+            } else {
+                localHigh = partitionSortingValue - 1;
+            }
+            partitionSortingValue = partition(arr, localLow, localHigh);
+        }
+        return arr[partitionSortingValue];
+    }
+
     static int partition(float[] arr, int low, int high) {
         float pivot = arr[high];
         int z = (low - 1);
@@ -42,44 +86,6 @@ public class QuickMedian {
         float temp = arr[z + 1];
         arr[z + 1] = arr[high];
         arr[high] = temp;
-
         return z + 1;
-    }
-
-    public static float kSelection(float[] arr, int low, int high, int k) {
-        int partitionSortingValue = partition(arr, low, high);
-        if (partitionSortingValue == k) {
-            return arr[partitionSortingValue];
-        } else if (partitionSortingValue < k) {
-            return kSelection(arr, partitionSortingValue + 1, high, k);
-        } else {
-            return kSelection(arr, low, partitionSortingValue - 1, k);
-        }
-    }
-
-    public static float fastMedian(float[] arr) {
-        int len = arr.length;
-        if (len % 2 == 1) {
-            return kSelection(arr, 0, len - 1, len / 2);  //median is at n/2 position if length is odd
-        } else {
-            float a = kSelection(arr, 0, len - 1, len / 2);
-            float b = kSelection(arr, 0, len - 1, len / 2 - 1);
-            return (a + b) / 2;       //median by performing average between n/2 and n/2-1
-        }
-    }
-
-    public static float fastMedian(List<Float> list) {
-        int size = list.size();
-        if (size < 1) {
-            return 0f;
-        } else if (size == 1) {
-            return list.get(0);
-        }
-
-        float[] arr = new float[size];
-        for (int k = 0; k < arr.length; k++) {
-            arr[k] = list.get(k);
-        }
-        return fastMedian(arr);
     }
 }
