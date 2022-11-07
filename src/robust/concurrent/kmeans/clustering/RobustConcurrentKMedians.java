@@ -11,8 +11,12 @@ public class RobustConcurrentKMedians extends RobustConcurrentKMeans {
      * @param maxIterations the maximum number of clustering iterations.
      * @param randomSeed    seed used with the random number generator.
      */
-    public RobustConcurrentKMedians(float[][] coordinates, int k, int maxIterations, long randomSeed) {
+    public RobustConcurrentKMedians(float[][] coordinates, int k, int maxIterations,
+                                    long randomSeed, int medianSkip) {
         super(coordinates, k, maxIterations, randomSeed);
         useKMedians = true;
+        if (medianSkip > 1) {
+            super.medianSkip = medianSkip;
+        }
     }
 }

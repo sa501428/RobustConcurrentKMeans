@@ -186,10 +186,15 @@ public class ProtoCluster {
      * Update the cluster center.
      *
      * @param coordinates the array of coordinates.
+     * @param medianSkip
      */
-    void updateCenter(float[][] coordinates, boolean useKMedians) {
+    void updateCenter(float[][] coordinates, boolean useKMedians, int medianSkip) {
         if (useKMedians) {
-            updateCenterKMedians(coordinates);
+            if (medianSkip > 1) {
+                updateCenterKMediansWithSkip(coordinates, medianSkip);
+            } else {
+                updateCenterKMedians(coordinates);
+            }
         } else {
             updateCenterKMeans(coordinates);
         }
@@ -224,6 +229,27 @@ public class ProtoCluster {
             for (int j = 0; j < mCenter.length; j++) {
                 List<Float> entries = new ArrayList<>();
                 for (int i = 0; i < mCurrentSize; i++) {
+                    float[] coord = coordinates[mCurrentMembership[i]];
+                    if (!Float.isNaN(coord[j])) {
+                        entries.add(coord[j]);
+                    }
+                }
+                if (entries.size() > 0) {
+                    mCenter[j] = QuickMedian.fastMedian(entries);
+                } else {
+                    mCenter[j] = Float.NaN;
+                }
+            }
+        }
+    }
+
+    private void updateCenterKMediansWithSkip(float[][] coordinates,
+                                              int skipVal) {
+        Arrays.fill(mCenter, 0f);
+        if (mCurrentSize > 0) {
+            for (int j = 0; j < mCenter.length; j++) {
+                List<Float> entries = new ArrayList<>();
+                for (int i = 0; i < mCurrentSize; i += skipVal) {
                     float[] coord = coordinates[mCurrentMembership[i]];
                     if (!Float.isNaN(coord[j])) {
                         entries.add(coord[j]);

@@ -34,6 +34,7 @@ public class RobustConcurrentKMeans implements KMeans {
     // 2D array holding the coordinates to be clustered.
     public static float[][] mCoordinates;
     protected boolean useKMedians = false;
+    protected int medianSkip = 0;
     // Temporary clusters used during the clustering process.  Converted to
     // an array of the simpler class Cluster at the conclusion.
     public static ProtoCluster[] mProtoClusters;
@@ -299,7 +300,7 @@ public class RobustConcurrentKMeans implements KMeans {
                     cluster.setUpdateFlag();
                     // If the update flag was set, update the center.
                     if (cluster.needsUpdate()) {
-                        cluster.updateCenter(mCoordinates, useKMedians);
+                        cluster.updateCenter(mCoordinates, useKMedians, medianSkip);
                     }
                 } else {
                     // When a cluster loses all of its members, it
