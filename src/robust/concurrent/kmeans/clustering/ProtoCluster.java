@@ -22,6 +22,9 @@ import robust.concurrent.kmeans.metric.QuickMedian;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Cluster class used temporarily during clustering.  Upon completion,
@@ -182,22 +185,8 @@ public class ProtoCluster {
         return mUpdateFlag;
     }
 
-    /**
-     * Update the cluster center.
-     *
-     * @param coordinates the array of coordinates.
-     * @param medianSkip
-     */
-    void updateCenter(float[][] coordinates, boolean useKMedians, int medianSkip) {
-        if (useKMedians) {
-            if (medianSkip > 1) {
-                updateCenterKMediansWithSkip(coordinates, medianSkip);
-            } else {
-                updateCenterKMedians(coordinates);
-            }
-        } else {
-            updateCenterKMeans(coordinates);
-        }
+    public static void launchParallelizedCode(Runnable runnable) {
+        launchParallelizedCode(Runtime.getRuntime().availableProcessors(), runnable);
     }
 
     private void updateCenterKMeans(float[][] coordinates) {
@@ -223,44 +212,65 @@ public class ProtoCluster {
         }
     }
 
-    private void updateCenterKMedians(float[][] coordinates) {
-        Arrays.fill(mCenter, 0f);
-        if (mCurrentSize > 0) {
-            for (int j = 0; j < mCenter.length; j++) {
-                List<Float> entries = new ArrayList<>();
-                for (int i = 0; i < mCurrentSize; i++) {
-                    float[] coord = coordinates[mCurrentMembership[i]];
-                    if (!Float.isNaN(coord[j])) {
-                        entries.add(coord[j]);
-                    }
+    public static void launchParallelizedCode(int numCPUThreads, final Runnable runnable) {
+        ExecutorService executor = Executors.newFixedThreadPool(numCPUThreads);
+
+        for (int l = 0; l < numCPUThreads; ++l) {
+            Runnable worker = new Runnable() {
+                public void run() {
+                    runnable.run();
                 }
-                if (entries.size() > 0) {
-                    mCenter[j] = QuickMedian.fastMedian(entries);
-                } else {
-                    mCenter[j] = Float.NaN;
-                }
+            };
+            executor.execute(worker);
+        }
+
+        executor.shutdown();
+
+        while (!executor.isTerminated()) {
+        }
+
+    }
+
+    /**
+     * Update the cluster center.
+     *
+     * @param coordinates the array of coordinates.
+     * @param medianSkip
+     */
+    void updateCenter(float[][] coordinates, boolean useKMedians, int medianSkip) {
+        if (useKMedians) {
+            if (medianSkip > 1) {
+                updateCenterKMediansWithSkip(coordinates, medianSkip);
+            } else {
+                updateCenterKMediansWithSkip(coordinates, 1);
             }
+        } else {
+            updateCenterKMeans(coordinates);
         }
     }
 
-    private void updateCenterKMediansWithSkip(float[][] coordinates,
-                                              int skipVal) {
+    private void updateCenterKMediansWithSkip(float[][] coordinates, int skipVal) {
         Arrays.fill(mCenter, 0f);
         if (mCurrentSize > 0) {
-            for (int j = 0; j < mCenter.length; j++) {
-                List<Float> entries = new ArrayList<>();
-                for (int i = 0; i < mCurrentSize; i += skipVal) {
-                    float[] coord = coordinates[mCurrentMembership[i]];
-                    if (!Float.isNaN(coord[j])) {
-                        entries.add(coord[j]);
+            AtomicInteger jIndex = new AtomicInteger(0);
+            launchParallelizedCode(() -> {
+                int j = jIndex.getAndIncrement();
+                while (j < mCenter.length) {
+                    List<Float> entries = new ArrayList<>();
+                    for (int i = 0; i < mCurrentSize; i += skipVal) {
+                        float[] coord = coordinates[mCurrentMembership[i]];
+                        if (!Float.isNaN(coord[j])) {
+                            entries.add(coord[j]);
+                        }
                     }
+                    if (entries.size() > 0) {
+                        mCenter[j] = QuickMedian.fastMedian(entries);
+                    } else {
+                        mCenter[j] = Float.NaN;
+                    }
+                    j = jIndex.getAndIncrement();
                 }
-                if (entries.size() > 0) {
-                    mCenter[j] = QuickMedian.fastMedian(entries);
-                } else {
-                    mCenter[j] = Float.NaN;
-                }
-            }
+            });
         }
     }
 }
